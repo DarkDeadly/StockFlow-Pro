@@ -128,3 +128,83 @@ sellProduct(
 - **Negative or Zero Quantity**: Blocked in the first validation.
 - **localStorage Failure**: Storage is full or blocked → Try-catch prevents crash (can be improved later).
 - **Concurrent Sales**: Multiple quick sales of the same product → Always recalculates available stock in real-time.
+
+
+
+
+/**
+ * Modifies a product in Stock then persists to localStorage
+ * @param {string} id - Product ID to update
+ * @param {Object} updates - Fields to update
+ * @returns {{success: boolean, stock: Product[], updated?: Product, error?: string}}
+ */
+const updateProduct = (id , updates) => {
+    // Guard: id validation
+    if (typeof id !== 'string' || id.trim() === '') {
+        return {
+            success: false ,
+            stock : Stock,
+            error : "Invalid ID: must be non-empty string"
+        }
+    }
+    // Guard: updates type
+    if (typeof updates !== 'object' || updates === null) {
+        return {
+            success: false,
+            stock : Stock,
+            error : "Invalid updates: must be a non-null object"
+        }
+    }
+    // find product by id
+    const product = Stock.find(item => item.id === id) 
+    // Guard: product existence
+    if (!product) {
+        return {
+            success : false,
+            stock : Stock,
+            error : `No product found with ID: ${id}`
+        }
+    }
+    // Guard: empty updates
+    if (Object.keys(updates).length === 0) {
+        return {
+            success: false,
+            stock : Stock,
+            error : "No updates provided: object is empty"
+        }
+    }
+    // Guard: validate fields if they exist in updates
+    if (
+            updates.price !== undefined && (typeof updates.price !== 'number' || updates.price < 0)
+            || updates.name !== undefined && typeof updates.name !== 'string'
+    ){
+             return {
+            success: false,
+            stock : Stock,
+            error : "Invalid updates: price must be a non-negative number and name must be a string"
+        }
+
+
+    }
+    // Create new product object with updates applied 
+       const newUpdates = {
+                id : product.id,
+                name : updates.name ?? product.name,
+                price : updates.price ?? product.price,
+                category : product.category,
+                stockIn : product.stockIn,
+                stockOut : product.stockOut,
+                sender : product.sender
+            }
+    // Replace the old product with the new one in the Stock array
+    Stock = Stock.map(item => item.id === id ? newUpdates : item)
+    saveToStorage()
+    return {
+        success: true,
+        stock : Stock,
+        updated : newUpdates
+    }
+
+   
+
+}

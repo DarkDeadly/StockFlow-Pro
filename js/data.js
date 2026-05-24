@@ -189,4 +189,85 @@ const getDashboardSummary = () => {
     return summary;
 };
 
-export { Stock, Sales, addProduct, sellProduct, getLowStockProducts , getDashboardSummary}
+/**
+ * By providing the Id of the product this function will delete the product from the stock
+ * @param {string} id  - the Id of the product to be deleted
+ * @return {{success: boolean, stock: Product[], deleted?: Product, error?: string}}
+ */
+const deleteProduct = (id) => {
+    if (typeof id !== 'string' || id.trim() === '') {
+        return {
+            success: false,
+            stock: Stock,
+            error: "Invalid ID: must be non-empty string"
+        };
+    }
+    let deleted = null
+
+    Stock = Stock.filter(item => {
+        if (item.id === id) {
+            deleted = item
+            return false; // Exclude this item from the new array
+        }
+        return true; // Keep this item
+    })
+    if (!deleted) {
+        return {
+            success : false,
+            stock : Stock,
+            error : `No product found with ID: ${id}`
+        }
+    }
+    saveToStorage()
+    return {
+        success: true,
+        stock: Stock,
+        deleted
+    }
+}
+/**
+ * Updates allowed fields of a product while protecting stockIn & stockOut
+ * @param {string} id - Product ID
+ * @param {Object} updates - Fields to update
+ * @returns {{success: boolean, stock: Product[], updated?: Product, error?: string}}
+ */
+const updateProduct = (id, updates) => {
+    if (typeof id !== 'string' || id.trim() === '') {
+        return { success: false, stock: Stock, error: "Invalid ID: must be a non-empty string" };
+    }
+
+    if (typeof updates !== 'object' || updates === null || Object.keys(updates).length === 0) {
+        return { success: false, stock: Stock, error: "Invalid updates: must be a non-empty object" };
+    }
+
+    const index = Stock.findIndex(item => item.id === id);
+    if (index === -1) {
+        return { success: false, stock: Stock, error: `No product found with ID: ${id}` };
+    }
+
+    const product = Stock[index];
+
+    // Only allow specific safe fields
+    const allowedUpdates = {};
+    if (updates.name !== undefined) allowedUpdates.name = updates.name;
+    if (updates.price !== undefined) allowedUpdates.price = updates.price;
+    if (updates.category !== undefined) allowedUpdates.category = updates.category;
+
+    if (Object.keys(allowedUpdates).length === 0) {
+        return { success: false, stock: Stock, error: "No valid fields to update" };
+    }
+
+    const updatedProduct = { ...product, ...allowedUpdates };
+
+    Stock[index] = updatedProduct;
+    saveToStorage();
+
+    return {
+        success: true,
+        stock: Stock,
+        updated: updatedProduct,
+        message: `Successfully updated ${updatedProduct.name}`
+    };
+};
+
+export { Stock, Sales, addProduct, sellProduct, getLowStockProducts , getDashboardSummary, deleteProduct, updateProduct}

@@ -539,4 +539,420 @@ const getDashboardSummary = () => {
     return summary;
 };
 ```
+# deleteProduct Function — Study Note
+
+## Core Idea
+
+Removes a product from the `Stock` array by filtering out the matching ID, persists the updated array to localStorage, and returns a structured result object indicating success or failure. Unlike previous functions that return `null` on error, this one returns a **consistent response envelope** (`{ success, stock, error/deleted }`) so the caller always receives predictable shape regardless of outcome.
+
+---
+
+## Step-by-step Logic
+
+- **Validate the `id` parameter**
+  - Not a string or empty/whitespace-only → return failure envelope with error message
+  - `id.trim() === ''` catches `"   "` and `""` — not just falsy checks
+
+- **Initialize `deleted` tracker**
+  - `let deleted = null` — will hold the removed item if found
+
+- **Filter `Stock` array**
+  - `Stock.filter()` creates a new array, reassigning `Stock` variable
+  - For each item:
+    - `item.id === id` → set `deleted = item`, return `false` (exclude from new array)
+    - Otherwise → return `true` (keep in new array)
+  - This is a **mutation via reassignment**, not in-place mutation
+
+- **Check if product was found and removed**
+  - `deleted` is still `null` → return failure envelope with "not found" error
+  - `deleted` holds the item → proceed to persistence
+
+- **Persist updated Stock to localStorage**
+  - `saveToStorage()` serializes the new `Stock` array (shorter by one item)
+
+- **Return success envelope**
+  - `success: true`, current `Stock` array, and the removed `deleted` item
+
+> ⚠️ **Note:** `Stock` is reassigned, not mutated in place
+> `Stock = Stock.filter(...)` replaces the array reference. Any external code holding a reference to the old `Stock` array (via `import { Stock }`) will see the new array because module bindings are live, but this pattern differs from `Stock.push()` or `Stock.length = 0` used elsewhere. Inconsistent mutation style across the module.
+
+> ⚠️ **Note:** `Sales` array is untouched — orphaned sale records remain
+> Deleting a product from `Stock` does not remove its sale history from `Sales`. Sale records still reference the deleted `productId`, creating **dangling references**. Revenue reports (`totalSalesValue`) still count those sales, but `Stock.find()` for that ID will fail. This is either a feature (preserve revenue history) or a bug (broken referential integrity), depending on requirements.
+
+> ⚠️ **Note:** Return shape is inconsistent with other functions
+> `addProduct` and `sellProduct` return the created item directly or `null`. `deleteProduct` returns an envelope object. Callers must handle two different response patterns in the same codebase. The envelope is better for delete operations (you need to know what was removed), but the inconsistency adds cognitive load.
+
+> ⚠️ **Note:** `saveToStorage()` is called after reassignment but before return
+> Same atomicity risk as `sellProduct`: if `saveToStorage()` throws, `Stock` is updated in memory but not persisted. On next reload, the "deleted" product reappears. No rollback mechanism.
+
+---
+
+## Real-world Analogy
+
+Think of a librarian removing a book from the catalog:
+
+> Librarian receives request: *"Remove book with catalog ID: BKU-2024-0042"*
+>
+> Librarian validates the request:
+> - ID is just whitespace or missing? → *"I need a valid catalog number"* (return error envelope)
+>
+> Librarian searches the shelves:
+> - Walks every aisle, pulls out books one by one
+> - Finds *"Advanced JavaScript Patterns"* with ID BKU-2024-0042
+>   - Sets it aside (`deleted = item`)
+>   - Does **not** put it back on the shelf (`return false`)
+> - All other books go back to their places (`return true`)
+>
+> Librarian checks if anything was removed:
+> - Nothing set aside? → *"No book with that ID in our collection"* (return error envelope)
+> - Book found and removed? → proceed
+>
+> Librarian updates the master catalog:
+> - Crosses out the entry in the big ledger (`saveToStorage`)
+>
+> Librarian returns a report:
+> - *"Success. Removed: 'Advanced JavaScript Patterns'. Current collection: 847 books."*
+>
+> The removed book still appears in **checkout history** (Sales array) — patrons who borrowed it retain their receipts. But the book itself is no longer available for new checkouts.
+
+---
+
+## Tiny Applied Example
+
+```javascript
+// Stock contains:
+// { id: "abc-123", name: "USB Cable", price: 12.99, stockIn: 50, stockOut: 10 }
+// { id: "def-456", name: "Webcam", price: 79.99, stockIn: 20, stockOut: 5 }
+
+deleteProduct("abc-123");
+// Returns:
+// {
+//   success: true,
+//   stock: [
+//     { id: "def-456", name: "Webcam", price: 79.99, stockIn: 20, stockOut: 5 }
+//   ],
+//   deleted: { id: "abc-123", name: "USB Cable", price: 12.99, stockIn: 50, stockOut: 10 }
+// }
+// Stock is now length 1. localStorage updated.
+
+deleteProduct("xyz-999");
+// Returns:
+// {
+//   success: false,
+//   stock: [ /* current Stock, unchanged */ ],
+//   error: "No product found with ID: xyz-999"
+// }
+
+deleteProduct("   ");
+// Returns:
+// {
+//   success: false,
+//   stock: [ /* current Stock, unchanged */ ],
+//   error: "Invalid ID: must be non-empty string"
+// }
+```
+
+---
+
+## Edge Cases & Defenses
+
+| Edge Case | What Happens | Defense |
+|-----------|-------------|---------|
+| `id` is `undefined` | Error envelope returned | `typeof id !== 'string'` catches non-strings |
+| `id` is empty string `""` | Error envelope returned | `id.trim() === ''` catches empty and whitespace-only |
+| `id` is `"   "` (spaces) | Error envelope returned | `.trim()` normalizes whitespace before check |
+| `id` is number `123` | Error envelope returned | `typeof` check rejects numbers |
+| `id` not found in Stock | Error envelope with "not found" message | `deleted` remains `null`, caught after filter |
+| Multiple products with same ID | Only first match removed | `filter()` stops at first match per item, but scans all; if duplicates exist, only one is caught per call |
+| `saveToStorage()` throws after removal | Product gone from memory, back on reload | **No defense** — same atomicity gap as other mutations |
+| `Stock` is empty array | `deleted` stays `null`, returns "not found" | Valid behavior — nothing to delete |
+| Product has `stockOut > 0` (sales history) | Removed from Stock, but Sales records persist | **No defense** — intentional or orphaned, depending on design intent |
+
+---
+
+## Source Code
+
+```javascript
+/**
+ * Removes a product from Stock by ID
+ * @param {string} id - Product ID to delete
+ * @returns {Object} Result envelope: { success, stock, error } or { success, stock, deleted }
+ */
+const deleteProduct = (id) => {
+    if (typeof id !== 'string' || id.trim() === '') {
+        return {
+            success: false,
+            stock: Stock,
+            error: "Invalid ID: must be non-empty string"
+        };
+    }
+    let deleted = null;
+
+    Stock = Stock.filter(item => {
+        if (item.id === id) {
+            deleted = item;
+            return false; // Exclude this item from the new array
+        }
+        return true; // Keep this item
+    });
+
+    if (!deleted) {
+        return {
+            success: false,
+            stock: Stock,
+            error: `No product found with ID: ${id}`
+        };
+    }
+
+    saveToStorage();
+    return {
+        success: true,
+        stock: Stock,
+        deleted
+    };
+};
+```
+---
+
+# updateProduct Function — Study Note
+
+## Core Idea
+
+Selectively updates permitted fields (`name`, `price`, `category`) on an existing product while explicitly protecting inventory-critical fields (`stockIn`, `stockOut`, `id`, `sender`) from accidental mutation. Uses immutable update pattern (spread into new object, replace array slot) and returns a consistent response envelope for predictable caller handling.
+
+---
+
+## Step-by-step Logic
+
+- **Validate `id` parameter**
+  - Not a string or empty/whitespace-only → return failure envelope with error message
+  - Same validation pattern as `deleteProduct` for consistency
+
+- **Validate `updates` parameter**
+  - Not an object, is `null`, or has no keys → return failure envelope
+  - `Object.keys(updates).length === 0` catches `{}` — a valid object but useless for updating
+
+- **Locate product index in Stock**
+  - `Stock.findIndex()` returns position (not the item itself)
+  - Index `-1` → return "not found" failure envelope
+
+- **Extract target product by index**
+  - `const product = Stock[index]` — direct reference to array element
+
+- **Build whitelist of allowed updates**
+  - Only three fields permitted: `name`, `price`, `category`
+  - Each checked with `!== undefined` to allow falsy values like `0`, `""`, or `false`
+  - `stockIn`, `stockOut`, `id`, `sender` are **silently ignored** even if present in `updates`
+
+- **Guard against empty whitelist**
+  - If no allowed fields were provided (e.g., only `stockIn` in `updates`) → return "no valid fields" error
+  - Prevents no-op updates that still trigger `saveToStorage()`
+
+- **Create updated product via spread**
+  - `{ ...product, ...allowedUpdates }` — shallow copy of original, overwritten by permitted changes
+  - Original `product` object in array is **not mutated**; replaced entirely
+
+- **Replace array slot with new reference**
+  - `Stock[index] = updatedProduct` — in-place replacement at known index
+  - More efficient than `filter()` + `push()` used in `deleteProduct`
+
+- **Persist to localStorage**
+  - `saveToStorage()` serializes updated `Stock` array
+
+- **Return success envelope**
+  - `success: true`, current `Stock`, the `updated` product, and a human-readable `message`
+
+> ⚠️ **Note:** `price` is not validated for type or range
+> `allowedUpdates.price = updates.price` accepts strings, negatives, `NaN`, or objects. A `price: "free"` or `price: -50` passes through silently. The update succeeds but corrupts downstream calculations (`totalSalesValue`, `totalStockValue`). `addProduct` validates price; `updateProduct` does not — inconsistent enforcement.
+
+> ⚠️ **Note:** `name` is not checked for uniqueness
+> Two products can share the same `name` after update. `addProduct` uses name-based upsert, so duplicate names break the "find existing" logic. Updating product B to match product A's name doesn't merge them — they remain separate items with different IDs.
+
+> ⚠️ **Note:** `sender` and `id` are protected but `date` / `createdAt` are not mentioned
+> If your product schema includes timestamps (e.g., `createdAt` from `addProduct`), they are neither protected nor updatable. The spread copies them forward, preserving them by accident rather than by design. Explicit field listing would be clearer.
+
+> ⚠️ **Note:** `message` field only appears on success, `error` only on failure
+> The return shape is **asymmetric**: success has `message`, failure has `error`. Callers checking `result.message` on a failure will get `undefined` instead of a clear signal. Consider unifying to a single `message` field, or always including both.
+
+> ⚠️ **Note:** `saveToStorage()` is called unconditionally after replacement
+> Even if `allowedUpdates` is empty (caught earlier) or if the new values equal old values (no actual change), the flow reaches `saveToStorage()`. The "no valid fields" guard prevents the empty case, but identical values still trigger I/O. For high-frequency updates, this is wasteful.
+
+---
+
+## Real-world Analogy
+
+Think of a hospital updating a patient's chart:
+
+> Nurse receives: *"Update patient MRN-8842: change room to 302, blood type to O+, and also secretly add 50 units to medication dosage"*
+>
+> Nurse validates the request:
+> - Medical record number missing or garbled? → *"Need a valid MRN"* (return error)
+> - Update form is blank or not a form at all? → *"Nothing to update"* (return error)
+>
+> Nurse pulls the chart from the filing cabinet:
+> - MRN-8842 not found? → *"No patient with that record number"* (return error)
+> - Found → lays chart on desk
+>
+> Nurse reviews update form against hospital policy:
+> - **Room number?** → ALLOWED → writes "302" on new sticky note
+> - **Blood type?** → ALLOWED → writes "O+" on sticky note
+> - **Medication dosage?** → **BLOCKED** → silently discards the request
+>     - *"Only doctors can change dosage. I'll ignore that part."*
+>
+> Nurse checks if anything is actually changing:
+> - Sticky note is blank (only blocked/invalid fields requested)? → *"No valid updates to apply"* (return error)
+>
+> Nurse creates a new chart page:
+> - Photocopies the entire old chart
+> - Overwrites room and blood type with sticky note values
+> - Original chart page stays untouched in the photocopier
+>
+> Nurse replaces old chart page in the binder:
+> - Slips new page into the exact slot where old page was
+> - Old page goes to shredder (garbage collected)
+>
+> Nurse updates the master backup system:
+> - Scans new chart to digital archive (`saveToStorage`)
+>
+> Nurse returns confirmation:
+> - *"Success. Patient MRN-8842 updated. Room 302, Blood O+. Chart archived."*
+>
+> The medication dosage request was **silently dropped** — the nurse didn't error on it, just ignored it. This prevents accidents but may confuse the doctor who thought the dosage was updated.
+
+---
+
+## Tiny Applied Example
+
+```javascript
+// Stock contains:
+// {
+//   id: "abc-123",
+//   name: "Wireless Mouse",
+//   price: 29.99,
+//   stockIn: 100,
+//   stockOut: 45,
+//   category: "Electronics",
+//   sender: "Logitech"
+// }
+
+updateProduct("abc-123", {
+    name: "Wireless Mouse Pro",
+    price: 34.99,
+    category: "Accessories",
+    stockIn: 999        // Silently ignored — protected field
+});
+// Returns:
+// {
+//   success: true,
+//   stock: [ /* full Stock array with updated product */ ],
+//   updated: {
+//     id: "abc-123",
+//     name: "Wireless Mouse Pro",
+//     price: 34.99,
+//     stockIn: 100,          // Unchanged — protected
+//     stockOut: 45,         // Unchanged — protected
+//     category: "Accessories",
+//     sender: "Logitech"    // Unchanged — protected
+//   },
+//   message: "Successfully updated Wireless Mouse Pro"
+// }
+
+updateProduct("abc-123", { stockIn: 50 });
+// Returns:
+// {
+//   success: false,
+//   stock: [ /* unchanged Stock */ ],
+//   error: "No valid fields to update"
+// }
+
+updateProduct("xyz-999", { name: "Ghost Product" });
+// Returns:
+// {
+//   success: false,
+//   stock: [ /* unchanged Stock */ ],
+//   error: "No product found with ID: xyz-999"
+// }
+
+updateProduct("abc-123", { price: "free" });
+// Returns:
+// {
+//   success: true,
+//   stock: [ /* updated Stock */ ],
+//   updated: { ...price: "free"... },    // ⚠️ String price — corrupts math later
+//   message: "Successfully updated Wireless Mouse Pro"
+// }
+```
+
+---
+
+## Edge Cases & Defenses
+
+| Edge Case | What Happens | Defense |
+|-----------|-------------|---------|
+| `id` is `undefined` | Error envelope returned | `typeof id !== 'string'` catches non-strings |
+| `id` is `"   "` (spaces) | Error envelope returned | `id.trim() === ''` normalizes whitespace |
+| `updates` is `null` | Error envelope returned | `updates === null` explicit check |
+| `updates` is array `[]` | Error envelope returned | `typeof [] === 'object'` passes, but `Object.keys([]).length === 0` catches it |
+| `updates` is `{}` | Error envelope returned | `Object.keys({}).length === 0` catches empty object |
+| `updates` contains only protected fields | Error envelope: "No valid fields" | Whitelist results in empty `allowedUpdates`, caught before mutation |
+| `updates` contains `id` or `sender` | Silently ignored | Not in whitelist — no error, just dropped |
+| `updates.price` is string `"free"` | Update succeeds, price becomes string | **No defense** — type validation missing |
+| `updates.price` is negative `-10` | Update succeeds, price negative | **No defense** — range validation missing |
+| `updates.name` matches existing product's name | Update succeeds, duplicate names exist | **No defense** — uniqueness not enforced |
+| `updates.name` is `""` (empty string) | Update succeeds, name blank | `!== undefined` allows empty string — valid or bug? |
+| `saveToStorage()` throws after replacement | In-memory state updated, localStorage stale | **No defense** — same atomicity gap |
+| `index` found but `Stock[index]` somehow missing | `product` is `undefined`, spread creates `{...undefined}` → runtime error | **No defense** — array slot race condition (impossible in single-threaded JS unless external code mutates array between `findIndex` and access) |
+
+---
+
+## Source Code
+
+```javascript
+/**
+ * Updates allowed fields of a product while protecting stockIn & stockOut
+ * @param {string} id - Product ID
+ * @param {Object} updates - Fields to update
+ * @returns {{success: boolean, stock: Product[], updated?: Product, error?: string}}
+ */
+const updateProduct = (id, updates) => {
+    if (typeof id !== 'string' || id.trim() === '') {
+        return { success: false, stock: Stock, error: "Invalid ID: must be a non-empty string" };
+    }
+
+    if (typeof updates !== 'object' || updates === null || Object.keys(updates).length === 0) {
+        return { success: false, stock: Stock, error: "Invalid updates: must be a non-empty object" };
+    }
+
+    const index = Stock.findIndex(item => item.id === id);
+    if (index === -1) {
+        return { success: false, stock: Stock, error: `No product found with ID: ${id}` };
+    }
+
+    const product = Stock[index];
+
+    // Only allow specific safe fields
+    const allowedUpdates = {};
+    if (updates.name !== undefined) allowedUpdates.name = updates.name;
+    if (updates.price !== undefined) allowedUpdates.price = updates.price;
+    if (updates.category !== undefined) allowedUpdates.category = updates.category;
+
+    if (Object.keys(allowedUpdates).length === 0) {
+        return { success: false, stock: Stock, error: "No valid fields to update" };
+    }
+
+    const updatedProduct = { ...product, ...allowedUpdates };
+
+    Stock[index] = updatedProduct;
+    saveToStorage();
+
+    return {
+        success: true,
+        stock: Stock,
+        updated: updatedProduct,
+        message: `Successfully updated ${updatedProduct.name}`
+    };
+};
+```
+
+---
 
