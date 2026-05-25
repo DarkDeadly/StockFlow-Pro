@@ -202,28 +202,25 @@ const deleteProduct = (id) => {
             error: "Invalid ID: must be non-empty string"
         };
     }
-    let deleted = null
-
-    Stock = Stock.filter(item => {
-        if (item.id === id) {
-            deleted = item
-            return false; // Exclude this item from the new array
-        }
-        return true; // Keep this item
-    })
-    if (!deleted) {
-        return {
-            success : false,
-            stock : Stock,
-            error : `No product found with ID: ${id}`
-        }
-    }
-    saveToStorage()
+    // find the index of the product to delete
+    // we used this method instead of filter to avoid creating a new array and to get the deleted product easily
+    const index = Stock.findIndex(item => item.id === id);
+    if (index === -1) return {
+        success: false,
+        stock: Stock,
+        error: `No product found with ID: ${id}`
+    };
+    // get the deleted product
+    const deleted = Stock[index];
+    // remove the product from the stock
+    Stock.splice(index, 1);
+    saveToStorage();
     return {
         success: true,
         stock: Stock,
         deleted
-    }
+    };
+    
 }
 /**
  * Updates allowed fields of a product while protecting stockIn & stockOut
@@ -270,4 +267,69 @@ const updateProduct = (id, updates) => {
     };
 };
 
-export { Stock, Sales, addProduct, sellProduct, getLowStockProducts , getDashboardSummary, deleteProduct, updateProduct}
+/** 
+ * By providing a name , price or a category this function will search for the product and return the results 
+ * @param {string} query - The search quiry which can be a name , price or category
+ * @return {{success: boolean, products: Product[] , error?: string}} - An object containing the search results
+ */
+const searchProducts = (query, limit = 50) => {
+    // 1. Validation
+    if (typeof query !== 'string' || query.trim() === '') {
+        return { 
+            success: false, 
+            products: [], 
+            count: 0,
+            error: "Invalid search query: must be a non-empty string" 
+        };
+    }
+
+    const lowerQuery = query.toLowerCase().trim();
+
+    // 2. Actual Search
+    const results = Stock.filter(item => 
+        item.name.toLowerCase().includes(lowerQuery) ||
+        item.category.toLowerCase().includes(lowerQuery) ||
+        item.price.toString().includes(lowerQuery)
+    ).slice(0, limit);
+
+    // 3. Return clean result
+    return {
+        success: true,
+        products: results,
+        count: results.length,
+        message: `Found ${results.length} product(s) matching "${query}"`
+    };
+};
+
+/**
+ * Retrieves a single product by its unique ID
+ * @param {string} id - Product ID
+ * @returns {{success: boolean, product: Product | null, error?: string}}
+ */
+const getProductById = (id) => {
+    if (typeof id !== 'string' || id.trim() === '') {
+        return {
+            success: false,
+            product: null,
+            error: "Invalid ID: must be a non-empty string"
+        };
+    }
+
+    const product = Stock.find(item => item.id === id);
+
+    if (!product) {
+        return {
+            success: false,
+            product: null,
+            error: `No product found`
+        };
+    }
+
+    return {
+        success: true,
+        product: { ...product }   // Return a shallow copy for safety
+    };
+};
+
+
+export { Stock, Sales, addProduct, sellProduct, getLowStockProducts , getDashboardSummary, deleteProduct, updateProduct , searchProducts}

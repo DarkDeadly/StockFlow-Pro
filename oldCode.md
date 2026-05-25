@@ -204,7 +204,27 @@ const updateProduct = (id , updates) => {
         stock : Stock,
         updated : newUpdates
     }
-
-   
-
 }
+
+let deleted = null
+
+    Stock = Stock.filter(item => {
+        if (item.id === id) {
+            deleted = item
+            return false; // Exclude this item from the new array
+        }
+        return true; // Keep this item
+    })
+    if (!deleted) {
+        return {
+            success : false,
+            stock : Stock,
+            error : `No product found with ID: ${id}`
+        }
+    }
+    saveToStorage()
+    return {
+        success: true,
+        stock: Stock,
+        deleted
+    }

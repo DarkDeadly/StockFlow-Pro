@@ -953,6 +953,174 @@ const updateProduct = (id, updates) => {
     };
 };
 ```
+---
+# searchProducts Function — Study Note
+
+## Core Idea
+
+Searches the `Stock` array for products matching a text query across three fields: `name`, `category`, and `price`. Returns a paginated result set (via `limit`) in a consistent response envelope. Acts as a **read-only query engine** — no mutations, no persistence, pure transformation of existing state.
 
 ---
+
+## Step-by-step Logic
+
+- **Validate `query` parameter**
+  - Not a string or empty/whitespace-only → return failure envelope with empty `products` array and `count: 0`
+  - `query.trim() === ''` catches `"   "` and `""` — not just falsy checks
+
+- **Normalize search term**
+  - `lowerQuery = query.toLowerCase().trim()` — case-insensitive matching, trimmed for consistency
+
+- **Filter Stock against all three searchable fields**
+  - `item.name.toLowerCase().includes(lowerQuery)` — partial name match
+  - `item.category.toLowerCase().includes(lowerQuery)` — partial category match
+  - `item.price.toString().includes(lowerQuery)` — price as substring match
+  - Any single match includes the product in results (OR logic)
+
+- **Apply result limit**
+  - `.slice(0, limit)` truncates results to maximum `limit` items (default 50)
+  - Prevents massive result sets from overwhelming the UI
+
+- **Return success envelope**
+  - `success: true`, `products` array, `count` (actual returned, not total matches), and human-readable `message`
+
+> ⚠️ **Note:** `price` search uses string inclusion, not numeric comparison
+> Searching `"25"` matches `$25.00`, `$125.50`, and `$250.00` because `"25"` appears in all three string representations. This is a **fuzzy text search**, not a price filter. A user searching `"25"` for "around $25" will get confusing results including `$125` and `$250`.
+
+> ⚠️ **Note:** `limit` is applied after filtering, not during
+> The entire `Stock` array is scanned and filtered before `.slice(0, limit)` truncates. For massive inventories, this wastes work on matches that get discarded. A more efficient approach would early-exit after `limit` matches, but `Array.filter` doesn't support early termination.
+
+> ⚠️ **Note:** No search on `sender` field
+> The `sender` property exists on products but is not searchable. If users need to find "all products from Logitech," this function cannot help. The whitelist approach (only name, category, price) is intentional but may surprise users.
+
+> ⚠️ **Note:** `count` is post-limit, not pre-limit
+> If 200 products match but `limit` is 50, `count` returns `50` — not `200`. The caller cannot know if results were truncated without comparing `count === limit`. Consider adding a `totalMatches` or `hasMore` field for paginated UIs.
+
+> ⚠️ **Note:** Case-insensitive via `toLowerCase()` has locale limitations
+> `toLowerCase()` works for ASCII but may behave unexpectedly with accented characters (e.g., `"É".toLowerCase()` → `"é"` — fine, but `"İ".toLowerCase()` → `"i̇"` with dot in some locales). For international inventory, `toLocaleLowerCase()` or a locale-aware search library would be safer.
+
+---
+
+## Real-world Analogy
+
+Think of a retail store employee helping a customer find products:
+
+> Customer asks: *"Do you have anything with 'pro' in the name? Or maybe in the category? Or priced around... 'pro'?"*
+>
+> Employee walks every aisle, checking three things per product:
+> - **Name tag:** Does it contain "pro"? "Wireless Mouse **Pro**" → YES, keep it
+> - **Shelf category:** Does it contain "pro"? "**Pro**fessional Audio" → YES, keep it
+> - **Price sticker:** Does "pro" appear in the numbers? "$**Pro**bably not" — wait, price is `$99.00`, no "pro" → skip
+>
+> Employee collects matches in a basket. After checking all aisles:
+> - Basket has 73 items? Customer only wants to see top 50 → employee removes the last 23
+> - Hands basket to customer: *"Found 50 products matching 'pro'"*
+>
+> Customer doesn't know 23 more items were found but discarded. If they want the rest, they can't ask — there's no "page 2" mechanism.
+
+---
+
+## Tiny Applied Example
+
+```javascript
+// Stock contains:
+// { name: "Wireless Mouse Pro", category: "Electronics", price: 59.99 }
+// { name: "USB Cable", category: "Accessories", price: 12.50 }
+// { name: "Pro Gaming Keyboard", category: "Electronics", price: 129.00 }
+// { name: "Mousepad Pro XL", category: "Accessories", price: 25.00 }
+// { name: "Webcam 4K", category: "Professional Video", price: 199.00 }
+
+searchProducts("pro", 3);
+// Returns:
+// {
+//   success: true,
+//   products: [
+//     { name: "Wireless Mouse Pro", ... },      // name match
+//     { name: "Pro Gaming Keyboard", ... },      // name match
+//     { name: "Mousepad Pro XL", ... }            // name match
+//     // Webcam excluded — "Professional" matched but sliced off by limit
+//   ],
+//   count: 3,
+//   message: "Found 3 product(s) matching "pro""
+// }
+
+searchProducts("12");
+// Returns:
+// {
+//   success: true,
+//   products: [
+//     { name: "USB Cable", price: 12.50, ... },   // price match: "12" in "12.50"
+//     { name: "Pro Gaming Keyboard", price: 129.00 }  // price match: "12" in "129.00"
+//   ],
+//   count: 2,
+//   message: "Found 2 product(s) matching "12""
+// }
+// ⚠️ User wanted $12 items, got $129 too — string inclusion is fuzzy
+
+searchProducts("   ");
+// Returns:
+// {
+//   success: false,
+//   products: [],
+//   count: 0,
+//   error: "Invalid search query: must be a non-empty string"
+// }
+```
+
+---
+
+## Edge Cases & Defenses
+
+| Edge Case | What Happens | Defense |
+|-----------|-------------|---------|
+| `query` is `undefined` | Error envelope returned | `typeof query !== 'string'` catches non-strings |
+| `query` is `"   "` (spaces) | Error envelope returned | `query.trim() === ''` normalizes whitespace |
+| `query` is `"PRO"` (uppercase) | Matches `"pro"` in lowercase fields | `toLowerCase()` normalizes case |
+| `query` is `"9."` | Matches any price containing `"9."` | String inclusion on `price.toString()` |
+| `query` matches 200 products, `limit` is 50 | Only first 50 returned, `count: 50` | `.slice(0, limit)` truncates; no `hasMore` flag |
+| `Stock` is empty | `results` is `[]`, `count: 0` | `filter()` on empty array returns `[]` naturally |
+| `item.name` or `item.category` is `undefined` | `toLowerCase()` throws `TypeError` | **No defense** — assumes all products have these fields |
+| `limit` is negative or zero | `.slice(0, -1)` returns unexpected results, or `.slice(0, 0)` returns `[]` | **No defense** — `limit` parameter is not validated |
+| `limit` is very large (e.g., `1000000`) | All matches returned, potential UI freeze | **No defense** — no upper bound on `limit` |
+
+---
+
+## Source Code
+
+```javascript
+/**
+ * Searches products by name, category, or price substring
+ * @param {string} query - Search term
+ * @param {number} [limit=50] - Maximum results to return
+ * @returns {{success: boolean, products: Array, count: number, message?: string, error?: string}}
+ */
+const searchProducts = (query, limit = 50) => {
+    // 1. Validation
+    if (typeof query !== 'string' || query.trim() === '') {
+        return { 
+            success: false, 
+            products: [], 
+            count: 0,
+            error: "Invalid search query: must be a non-empty string" 
+        };
+    }
+
+    const lowerQuery = query.toLowerCase().trim();
+
+    // 2. Actual Search
+    const results = Stock.filter(item => 
+        item.name.toLowerCase().includes(lowerQuery) ||
+        item.category.toLowerCase().includes(lowerQuery) ||
+        item.price.toString().includes(lowerQuery)
+    ).slice(0, limit);
+
+    // 3. Return clean result
+    return {
+        success: true,
+        products: results,
+        count: results.length,
+        message: `Found ${results.length} product(s) matching "${query}"`
+    };
+};
+```
 
