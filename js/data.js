@@ -143,7 +143,7 @@ const getLowStockProducts = (threshold = 5) => {
         return [];
     }
 
-    const lowStockItems = Stock.filter(item => 
+    const lowStockItems = Stock.filter(item =>
         (item.stockIn - item.stockOut) < threshold
     );
 
@@ -162,7 +162,7 @@ const getLowStockProducts = (threshold = 5) => {
  */
 const getDashboardSummary = () => {
     const totalProducts = Stock.length;
-    
+
     const totalStockValue = Stock.reduce((sum, item) => {
         return sum + (item.price * item.stockIn); // Total warehouse value
     }, 0);
@@ -172,7 +172,7 @@ const getDashboardSummary = () => {
     }, 0);
 
     const lowStockCount = getLowStockProducts(5).length;
-    const outOfStockCount = Stock.filter(item => 
+    const outOfStockCount = Stock.filter(item =>
         (item.stockIn - item.stockOut) <= 0
     ).length;
 
@@ -220,7 +220,7 @@ const deleteProduct = (id) => {
         stock: Stock,
         deleted
     };
-    
+
 }
 /**
  * Updates allowed fields of a product while protecting stockIn & stockOut
@@ -266,38 +266,41 @@ const updateProduct = (id, updates) => {
         message: `Successfully updated ${updatedProduct.name}`
     };
 };
-
-/** 
- * By providing a name , price or a category this function will search for the product and return the results 
- * @param {string} query - The search quiry which can be a name , price or category
- * @return {{success: boolean, products: Product[] , error?: string}} - An object containing the search results
+/**
+ * Searches products by name, category, or price
+ * @param {string} query - Search term
+ * @param {number} [limit=50] - Max results
+ * @returns {{success: boolean, products: Product[], count: number, message?: string, error?: string}}
  */
 const searchProducts = (query, limit = 50) => {
-    // 1. Validation
     if (typeof query !== 'string' || query.trim() === '') {
-        return { 
-            success: false, 
-            products: [], 
+        return {
+            success: false,
+            products: [],
             count: 0,
-            error: "Invalid search query: must be a non-empty string" 
+            error: "Invalid search query: must be a non-empty string"
         };
     }
 
     const lowerQuery = query.toLowerCase().trim();
+    const numericQuery = Number(lowerQuery);
 
-    // 2. Actual Search
-    const results = Stock.filter(item => 
+    const results = Stock.filter(item =>
         item.name.toLowerCase().includes(lowerQuery) ||
         item.category.toLowerCase().includes(lowerQuery) ||
-        item.price.toString().includes(lowerQuery)
+        item.id === query ||
+        (!isNaN(numericQuery) && item.price === numericQuery) // Match exact price only if query is a valid number
+
     ).slice(0, limit);
 
-    // 3. Return clean result
+    // Return shallow copies for safety
+    const safeResults = results.map(product => ({ ...product }));
+
     return {
         success: true,
-        products: results,
-        count: results.length,
-        message: `Found ${results.length} product(s) matching "${query}"`
+        products: safeResults,
+        count: safeResults.length,
+        message: `Found ${safeResults.length} product(s) matching "${query}"`
     };
 };
 
@@ -331,5 +334,43 @@ const getProductById = (id) => {
     };
 };
 
+/**
+ * Returns all products with optional limit and sorting
+ * @param {number} [limit=50] - Maximum number of products to return
+ * @param {string} [sortBy='name'] - Field to sort by ('name', 'price', 'category')
+ * @returns {{success: boolean, products: Product[], count: number}}
+ */
+const getAllProducts = (limit = 50, sortBy = 'name') => {
+    if (typeof limit !== 'number' || limit < 1) limit = 50;
 
-export { Stock, Sales, addProduct, sellProduct, getLowStockProducts , getDashboardSummary, deleteProduct, updateProduct , searchProducts}
+    const validFields = ['name', 'price', 'category'];
+    const sortField = validFields.includes(sortBy) ? sortBy : 'name';
+
+    const sortedProducts = [...Stock].sort((a, b) => {
+        if (sortField === 'price') {
+            return a.price - b.price; // ascending price
+        }
+        // string comparison for name and category
+        return String(a[sortField]).localeCompare(String(b[sortField]));
+    }).slice(0, limit);
+
+    return {
+        success: true,
+        products: sortedProducts.map(p => ({ ...p })),
+        count: sortedProducts.length,
+        totalProducts: Stock.length
+    };
+};
+
+/**
+ * Calculates total revenue from all recorded sales
+ * @returns {number} Total revenue from all sales
+ */
+const calculateTotalRevenue = () => {
+    return Sales.reduce((total, sale) => {
+        return total + (sale.total || 0);
+    }, 0);
+};
+
+
+export { Stock, Sales, addProduct, sellProduct, getLowStockProducts, getDashboardSummary, deleteProduct, updateProduct, searchProducts, getProductById, getAllProducts, calculateTotalRevenue, saveToStorage, loadFromStorage }

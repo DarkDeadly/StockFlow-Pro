@@ -16,3 +16,4 @@
 - [ done ] Implement the delete and the modify function
 - [ done ] Improved the delete function by making it better for performance and memory
 - [ done ] Implemented both the functionaly of getting by Id and searching the product
+- [ done ] Implemented the util functionality of both the getALlPRoducts and revenue calculation
