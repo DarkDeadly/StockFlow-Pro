@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow Pro</title>
+    <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+   <!-- 1. APP WRAPPER (The Layout Root) -->
+    <div class="app-layout">
+        
+        <!-- 2. SIDEBAR COMPONENT -->
+        <aside class="sidebar">
+            <div class="sidebar__brand">
+                <h2 class="sidebar__title">StockFlow Pro</h2>
+            </div>
+            
+            <nav class="sidebar__nav">
+                <ul class="sidebar__menu">
+                    <li class="sidebar__item">
+                        <a href="#" class="sidebar__link sidebar__link--active">
+                            <span class="sidebar__icon">🏠</span> Home
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="#" class="sidebar__link">
+                            <span class="sidebar__icon">📦</span> Products
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="#" class="sidebar__link">
+                            <span class="sidebar__icon">💰</span> Sales
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="#" class="sidebar__link">
+                            <span class="sidebar__icon">📊</span> Dashboard
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="#" class="sidebar__link">
+                            <span class="sidebar__icon">📈</span> Reports
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 3. MAIN WORKSPACE VIEW -->
+        <div class="main-viewport">
+            
+            <!-- 4. TOP UTILITY HEADER -->
+            <header class="top-bar">
+                <div class="top-bar__search-box">
+                    <!-- Added an explicit label for accessibility (hidden visually but readable by screen readers) -->
+                    <label Improvement for="searchBar" class="sr-only">Search products</label>
+                    <input type="search" id="searchBar" class="top-bar__search-input" placeholder="Search products...">
+                </div>
+                
+                <div class="top-bar__actions">
+                    <button id="darkModeToggle" class="top-bar__btn-toggle" aria-label="Toggle dark mode">🌙</button>
+                    
+                    <div class="user-badge">
+                        <span class="user-badge__greeting">Welcome back,</span>
+                        <strong class="user-badge__name">Admin</strong>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 5. DYNAMIC CONTENT CONTAINER -->
+            <main id="content-area" class="content-view">
+                <!-- Single wrapper inside main makes managing grid/flex spacing for dashboard cards incredibly easy -->
+                <div class="content-view__container">
+                    <h1 class="content-view__title">Welcome to StockFlow Pro</h1>
+                    <!-- Dynamic views will mount here -->
+                </div>
+            </main>
+            
+        </div>
+    </div>
+
+    <script type="module" src="./js/data.js"></script>
+    <script type="module" src="./js/ui.js"></script>
+</body>
+</html>

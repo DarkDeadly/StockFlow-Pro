@@ -17,3 +17,12 @@
 - [ done ] Improved the delete function by making it better for performance and memory
 - [ done ] Implemented both the functionaly of getting by Id and searching the product
 - [ done ] Implemented the util functionality of both the getALlPRoducts and revenue calculation
+
+
+ **Current Phase:** 2 - UI Layer 
+
+ **Today 29/05/2026**
+
+- [ done ] Fix the HTML structure (clean classes, better organization)
+- [ done ] Add basic CSS (sidebar fixed, nice header, responsive feel)
+- [ done ] render all the products

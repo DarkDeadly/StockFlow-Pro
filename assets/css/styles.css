@@ -1,0 +1,301 @@
+/* ==========================================================================
+   1. GLOBAL RESETS & BASE STYLES
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   2. MASTER APP LAYOUT INTERFACE
+   ========================================================================== */
+.app-layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+.main-viewport {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* ==========================================================================
+   3. SIDEBAR COMPONENT (Enhanced Breathing Room & Contrast)
+   ========================================================================== */
+.sidebar {
+    background-color: #1e293b; /* Swapped generic #333 for a deep slate for modern look */
+    width: 260px;
+    height: 100vh;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #334155;
+}
+
+.sidebar__brand {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 24px; /* Increased breathing room */
+    letter-spacing: -0.5px;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar__nav {
+    flex: 1;
+    padding: 24px 16px; /* Increased lateral and vertical menu container padding */
+}
+
+.sidebar__menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Smooth, distinct element gap */
+}
+
+.sidebar__link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: #94a3b8; /* Cleaner unselected contrast ratio */
+    text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* State Adjustments */
+.sidebar__link:hover {
+    background-color: #273549; 
+    color: #f8fafc;
+}
+
+/* High Contrast Active State Strategy */
+.sidebar__link--active {
+    background-color: #4f46e5; 
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); /* Makes the current view distinct */
+}
+
+/* ==========================================================================
+   4. TOP BAR UTILITIES (Prominent, Expanded Search Box)
+   ========================================================================== */
+.top-bar {
+    height: 70px;
+    padding: 0 32px; /* Increased padding from 20px for open execution */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #ffffff;
+    flex-shrink: 0;
+}
+
+/* Expanded & Prominent Search Design */
+.top-bar__search-box {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    max-width: 500px; /* Widened the search cap from 400px to 500px */
+}
+
+.top-bar__search-input {
+    width: 100%;
+    padding: 12px 18px; /* Deeper padding input for luxurious feel */
+    font-size: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px; /* Marginally smoother curve */
+    background-color: #f1f5f9; /* Darkened background variant for visibility contrast */
+    color: #1e293b;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.top-bar__search-input:focus {
+    background-color: #ffffff;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15); /* More prominent focus ring glow */
+}
+
+/* Action Groups */
+.top-bar__actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.top-bar__btn-toggle {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    transition: all 0.2s ease;
+}
+
+.top-bar__btn-toggle:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+/* User Badge Identity */
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+}
+
+.user-badge__greeting {
+    color: #64748b;
+}
+
+.user-badge__name {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   5. WORKSPACE WORK AREA
+   ========================================================================== */
+.content-view {
+    flex: 1;
+    padding: 40px; /* Increased content boundary padding for modern structure layouts */
+    overflow-y: auto;
+}
+
+/* ==========================================================================
+   6. UTILITY / ACCESSIBILITY ARTIFACTS
+   ========================================================================== */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto; /* Safety slide block layout on lower resolution devices */
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse; /* Shares single clean wireframes borders */
+    text-align: left;
+    font-size: 14px;
+    min-width: 700px;
+}
+
+.inventory-table thead tr {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.inventory-table th {
+    padding: 16px 24px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.inventory-table__row {
+    border-bottom: 1px solid #f1f5f9;
+    background-color: #ffffff;
+    /* UPGRADED: Added a smooth cubic-bezier transition for background shifts */
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.inventory-table__row:hover {
+    background-color: #f8fafc; /* Gentle slate tint on hover */
+    cursor: pointer;
+
+}
+.inventory-table__row:last-child {
+    border-bottom: none;
+}
+
+
+/* Warning Modifier Row Treatment for Low Items */
+.inventory-table__row--alert {
+    background-color: #fff7ed; /* Warning tint */
+    /* UPGRADED: Ensure the alert row also shares the smooth transition */
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.inventory-table__row--alert:hover {
+    background-color: #ffedd5; /* Smooth shift to deeper warning tint */
+}
+
+.inventory-table__cell {
+    padding: 16px 24px;
+    color: #334155;
+    vertical-align: middle;
+}
+
+/* Micro Helpers */
+.font-medium { font-weight: 500; color: #0f172a; }
+.font-bold { font-weight: 600; }
+.text-muted { color: #64748b; }
+.text-indigo { color: #4f46e5; }
+
+/* ==========================================================================
+   7. STATUS PILL BADGES
+   ========================================================================== */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* UPGRADED: Increased padding from 6px 12px for better visual presence */
+    padding: 6px 14px; 
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2; /* Tweaked line-height to center text perfectly */
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+.badge--success {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge--danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}

@@ -20,6 +20,8 @@ const saveToStorage = () => {
     }
 }
 
+
+
 /**
  * This function will load the data from the localStorage
  * @return {void} - This function does not return anything
@@ -31,7 +33,7 @@ const loadFromStorage = () => {
         const sale = localStorage.getItem("sales")
         if (data) {
             const stockData = JSON.parse(data)
-            Stock.length = 0          // this will assure no duplicates will be added 
+            Stock.length = 0        // this will assure no duplicates will be added 
             Stock.push(...stockData)  // Populate with stored data
         }
         if (sale) {
@@ -274,12 +276,14 @@ const updateProduct = (id, updates) => {
  */
 const searchProducts = (query, limit = 50) => {
     if (typeof query !== 'string' || query.trim() === '') {
-        return {
+        const errorObject = {
             success: false,
             products: [],
             count: 0,
             error: "Invalid search query: must be a non-empty string"
         };
+        console.error(errorObject);
+        return errorObject
     }
 
     const lowerQuery = query.toLowerCase().trim();
@@ -293,9 +297,18 @@ const searchProducts = (query, limit = 50) => {
 
     ).slice(0, limit);
 
+    if (results.length === 0) {
+
+        return {
+            success: false,
+            products: [],
+            count: 0,
+            message: `No products found "`
+        };
+    }
+
     // Return shallow copies for safety
     const safeResults = results.map(product => ({ ...product }));
-
     return {
         success: true,
         products: safeResults,
@@ -338,7 +351,7 @@ const getProductById = (id) => {
  * Returns all products with optional limit and sorting
  * @param {number} [limit=50] - Maximum number of products to return
  * @param {string} [sortBy='name'] - Field to sort by ('name', 'price', 'category')
- * @returns {{success: boolean, products: Product[], count: number}}
+ * @returns {{success: boolean, products: Product[], count: number, total: number, message?: string}}
  */
 const getAllProducts = (limit = 50, sortBy = 'name') => {
     if (typeof limit !== 'number' || limit < 1) limit = 50;
@@ -346,19 +359,34 @@ const getAllProducts = (limit = 50, sortBy = 'name') => {
     const validFields = ['name', 'price', 'category'];
     const sortField = validFields.includes(sortBy) ? sortBy : 'name';
 
-    const sortedProducts = [...Stock].sort((a, b) => {
-        if (sortField === 'price') {
-            return a.price - b.price; // ascending price
-        }
-        // string comparison for name and category
-        return String(a[sortField]).localeCompare(String(b[sortField]));
-    }).slice(0, limit);
+    const sortedProducts = [...Stock]
+        .sort((a, b) => {
+            if (sortField === 'price') {
+                return a.price - b.price;
+            }
+            return String(a[sortField]).localeCompare(String(b[sortField]));
+        })
+        .slice(0, limit)
+        .map(p => ({ ...p }));
+
+    const count = sortedProducts.length;
+    const total = Stock.length;
+
+    if (count === 0) {
+        return {
+            success: false,
+            products: [],
+            count: 0,
+            total,
+            message: 'No products available'
+        };
+    }
 
     return {
         success: true,
-        products: sortedProducts.map(p => ({ ...p })),
-        count: sortedProducts.length,
-        totalProducts: Stock.length
+        products: sortedProducts,
+        count,
+        total
     };
 };
 
@@ -372,5 +400,22 @@ const calculateTotalRevenue = () => {
     }, 0);
 };
 
+addProduct({
+    name : "iPhone 14 Pro Max",
+    price : 1600,
+    stockIn : 10,
+    sender : "Apple Inc.",
+    category : "Electronics"
+})
+addProduct({
+    name : "basketBall",
+    price : 120,
+    stockIn : 80,
+    sender : "BasketBall Org",
+    category : "Sport"
+})
+
+
+loadFromStorage();
 
 export { Stock, Sales, addProduct, sellProduct, getLowStockProducts, getDashboardSummary, deleteProduct, updateProduct, searchProducts, getProductById, getAllProducts, calculateTotalRevenue, saveToStorage, loadFromStorage }
