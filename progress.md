@@ -28,3 +28,4 @@
 - [ done ] render all the products
 - [ done ] connecting the search functionality
 - [ done ] fixed the problem of event delegation
+- [ done ] improving the renderProducts in order to be safe against XSS
