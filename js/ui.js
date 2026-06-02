@@ -18,25 +18,25 @@ const debounce = (func , wait) => {
 }
 
 /**
- * Renders all the products in a dense tabular administration view
- * @returns {void} 
+ * Renders all products in a clean, responsive table
+ * @param {Array|null} products - Optional array of products to render
+ * @returns {void}
  */
 const renderProducts = (products = null) => {
     const container = document.querySelector('.content-view__container');
     if (!container) return;
 
-    // Clear and set up page title early
+    // Clear and set title
     container.innerHTML = `<h1 class="content-view__title">All Products</h1>`;
 
-    // Extract raw payload array cleanly
+    // Use provided products or fetch all
     const displayProducts = products || Data.getAllProducts(50).products;
-    
+
     if (displayProducts.length === 0) {
-        container.innerHTML += `<p class="text-muted">No products found.</p>`;
+        container.innerHTML += `<p class="empty-state">No products found in inventory.</p>`;
         return;
     }
 
-    // Build the complete template in perfect top-down HTML order
     const tableHTML = `
         <div class="table-responsive">
             <table class="inventory-table">
@@ -50,17 +50,17 @@ const renderProducts = (products = null) => {
                         <th>Status</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="products-tbody">
                     ${displayProducts.map(product => {
-                        // Calculate metrics safely within the scope of each individual product loop pass
                         const available = product.stockIn - product.stockOut;
                         const isLow = available < 5;
-                        
+
                         return `
-                            <tr class="inventory-table__row ${isLow ? 'inventory-table__row--alert' : ''}">
+                            <tr class="inventory-table__row ${isLow ? 'inventory-table__row--alert' : ''}" 
+                                data-id="${product.id}">
                                 <td class="inventory-table__cell font-medium">${product.name}</td>
                                 <td class="inventory-table__cell">${product.category}</td>
-                                <td class="inventory-table__cell text-muted">${product.sender}</td>
+                                <td class="inventory-table__cell text-muted">${product.sender || '—'}</td>
                                 <td class="inventory-table__cell font-bold text-indigo">$${Number(product.price).toFixed(2)}</td>
                                 <td class="inventory-table__cell">${available} units</td>
                                 <td class="inventory-table__cell">
@@ -68,32 +68,71 @@ const renderProducts = (products = null) => {
                                         ${isLow ? 'Low Stock' : 'In Stock'}
                                     </span>
                                 </td>
-                            </tr>
-                        `;
+                            </tr>`;
                     }).join('')}
                 </tbody>
             </table>
         </div>
     `;
 
-    // Append the completed layout chunk to your viewport in one single render step
     container.innerHTML += tableHTML;
+
+   
 };
-renderProducts()
 
 /**
- * This function is a connector for the search input it will listen for the input event and then call the search function with the value of the input 
- * @returns {void} 
+ * Adds click listeners to all product rows
  */
+const addRowClickListeners = () => {
+    // use event delegation for better performance and to handle dynamic content
+    const tableContainer = document.querySelector('.content-view__container')
+    if (!tableContainer) return;
+    tableContainer.addEventListener('click' , (e) => {
+        const row = e.target.closest('.inventory-table__row')
+        if (row && row.dataset.id) {
+            const productId = row.dataset.id;
+            const product = Data.getProductById(productId);
+            console.log('Clicked product:', product);
+        }
+    })
+   
+};
 
-/*
-const searchInputConnector = () => {
-    const searchInput = document.getElementById('searchBar') 
-    searchInput.addEventListener('input' , debounce(() => {
-        const query = searchInput.value.trim();
-        searchProducts(query);
-    } , 300) )
-}
+/**
+ * Connects the search input to the searchProducts function
+ * @returns {void}
+ */
+const initSearch = () => {
+    const searchInput = document.getElementById('searchBar');
+    if (!searchInput) {
+        console.warn('searchBar element not found in DOM');
+        return;
+    }
 
-searchInputConnector() ;*/
+    const handleSearch = debounce((query) => {
+        // Show all products when search is cleared
+        if (query.trim() === '') {
+            const { products = [] } = Data.getAllProducts(50);
+            renderProducts(products);
+            return;
+        }
+
+        const result = Data.searchProducts(query, 50);
+
+        if (result.success) {
+            renderProducts(result.products);
+        } else {
+            renderProducts([]);  // triggers empty state in renderProducts
+        }
+    }, 300);  // ← wait time is required
+
+    searchInput.addEventListener('input', (e) => {
+        handleSearch(e.target.value.trim());  // trim at the source
+    });
+};
+
+renderProducts()
+addRowClickListeners();
+
+initSearch() ;
 

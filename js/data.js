@@ -399,6 +399,7 @@ const calculateTotalRevenue = () => {
         return total + (sale.total || 0);
     }, 0);
 };
+loadFromStorage();
 
 addProduct({
     name : "iPhone 14 Pro Max",
@@ -416,6 +417,5 @@ addProduct({
 })
 
 
-loadFromStorage();
 
 export { Stock, Sales, addProduct, sellProduct, getLowStockProducts, getDashboardSummary, deleteProduct, updateProduct, searchProducts, getProductById, getAllProducts, calculateTotalRevenue, saveToStorage, loadFromStorage }

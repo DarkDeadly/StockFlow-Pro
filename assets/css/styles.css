@@ -241,7 +241,7 @@ body {
     transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .inventory-table__row:hover {
-    background-color: #f8fafc; /* Gentle slate tint on hover */
+    background-color: #f8fafcc5; /* Gentle slate tint on hover */
     cursor: pointer;
 
 }

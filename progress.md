@@ -26,3 +26,5 @@
 - [ done ] Fix the HTML structure (clean classes, better organization)
 - [ done ] Add basic CSS (sidebar fixed, nice header, responsive feel)
 - [ done ] render all the products
+- [ done ] connecting the search functionality
+- [ done ] fixed the problem of event delegation
