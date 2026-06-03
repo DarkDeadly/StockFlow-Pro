@@ -1,21 +1,6 @@
 import * as Data from './data.js';
-import {createElements} from "./utils.js"
-const { searchProducts } = Data ; 
+import {createElements , debounce , createDetailElements}  from "./utils.js"
 
-/**
- * This function is used to debounce a function it will delay the execution of the function until after a certain amount of time has passed since the last time it was called.
- * @param {Function} func - The function to debounce
- * @param {number} wait - The amount of time to wait before executing the function
- * @returns {Function} - The debounced function
- */
-
-const debounce = (func , wait) => {
-    let timeout ; 
-    return function(...args) {
-        clearTimeout(timeout) ;
-        timeout = setTimeout(() => func.apply(this , args) , wait) ;
-    }
-}
 
 /**
  * Renders the products in the DOM
@@ -84,6 +69,20 @@ const renderProducts = (products = null) => {
 
 };
 
+const initModal = () => {
+    const modal = document.querySelector('#product-modal');
+    if (!modal) return;
+
+    const closeBtn = document.querySelector('#modal-close-btn');
+    if (!closeBtn) return;
+
+    // These listeners live FOREVER - only added once
+    closeBtn.addEventListener('click', () => modal.close());
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.close();
+    });
+};
+
 /**
  * Adds click listeners to all product rows
  */
@@ -95,11 +94,54 @@ const addRowClickListeners = () => {
         const row = e.target.closest('.inventory-table__row')
         if (row && row.dataset.id) {
             const productId = row.dataset.id;
-            const product = Data.getProductById(productId);
-            console.log('Clicked product:', product);
+            const products = Data.getProductById(productId);
+            if (products.success && products.product) {
+                showProductDetails(products.product)
+            }
+            
         }
     })
    
+};
+
+const showProductDetails = (product) => {
+    if (!product) return;
+
+    const modal = document.querySelector('#product-modal');
+
+    if (!modal) return;
+
+    const dialogBody = modal.querySelector('#modal-body');
+
+    if (!dialogBody) return;
+
+    const available = product.stockIn - product.stockOut;
+    const isLow = available < 5;
+
+   // Clear previous content
+    dialogBody.innerHTML = '';
+
+    // Grid container
+    const grid = createElements('div', ['modal-detail-grid']);
+    const buttonsContainer = createElements('div', ['modal-buttons']);
+    const editBtn = createElements('button', ['btn', 'btn--primary'], 'Edit');
+    const deleteBtn = createElements('button', ['btn', 'btn--danger'], 'Sell');
+    
+    buttonsContainer.append(editBtn, deleteBtn);
+    
+
+    grid.append(
+    createDetailElements('Name', product.name),
+    createDetailElements('Category', product.category),
+    createDetailElements('Sender', product.sender || '—'),
+    createDetailElements('Price', `$${Number(product.price).toFixed(2)}`, ['text-indigo', 'font-bold']),
+    createDetailElements('Stock Status', `${available} units available`, ['badge', isLow ? 'badge--danger' : 'badge--success']) , 
+    )
+    
+
+    dialogBody.append(grid , buttonsContainer);
+
+    modal.showModal();
 };
 
 /**
@@ -115,7 +157,7 @@ const initSearch = () => {
 
     const handleSearch = debounce((query) => {
         // Show all products when search is cleared
-        if (query.trim() === '') {
+        if (query === '') {
             const { products = [] } = Data.getAllProducts(50);
             renderProducts(products);
             return;
@@ -136,7 +178,7 @@ const initSearch = () => {
 };
 
 renderProducts()
-addRowClickListeners();
-
-initSearch() ;
+addRowClickListeners() 
+initModal()           
+initSearch()          
 

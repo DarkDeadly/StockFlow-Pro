@@ -293,7 +293,7 @@ const searchProducts = (query, limit = 50) => {
         item.name.toLowerCase().includes(lowerQuery) ||
         item.category.toLowerCase().includes(lowerQuery) ||
         item.id === query ||
-        (!isNaN(numericQuery) && item.price === numericQuery) // Match exact price only if query is a valid number
+        (item.price >= numericQuery && item.price < numericQuery + 1) // Match exact price only if query is a valid number
 
     ).slice(0, limit);
 
@@ -303,7 +303,7 @@ const searchProducts = (query, limit = 50) => {
             success: false,
             products: [],
             count: 0,
-            message: `No products found "`
+            message: `No products found matching "${query}"`
         };
     }
 
@@ -400,21 +400,6 @@ const calculateTotalRevenue = () => {
     }, 0);
 };
 loadFromStorage();
-
-addProduct({
-    name : "iPhone 14 Pro Max",
-    price : 1600,
-    stockIn : 10,
-    sender : "Apple Inc.",
-    category : "Electronics"
-})
-addProduct({
-    name : "basketBall",
-    price : 120,
-    stockIn : 80,
-    sender : "BasketBall Org",
-    category : "Sport"
-})
 
 
 

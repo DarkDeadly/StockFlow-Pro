@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StockFlow Pro</title>
     <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
+
 <body>
-   <!-- 1. APP WRAPPER (The Layout Root) -->
+    <!-- 1. APP WRAPPER (The Layout Root) -->
     <div class="app-layout">
-        
+
         <!-- 2. SIDEBAR COMPONENT -->
         <aside class="sidebar">
             <div class="sidebar__brand">
                 <h2 class="sidebar__title">StockFlow Pro</h2>
             </div>
-            
+
             <nav class="sidebar__nav">
                 <ul class="sidebar__menu">
                     <li class="sidebar__item">
@@ -49,7 +51,7 @@
 
         <!-- 3. MAIN WORKSPACE VIEW -->
         <div class="main-viewport">
-            
+
             <!-- 4. TOP UTILITY HEADER -->
             <header class="top-bar">
                 <div class="top-bar__search-box">
@@ -57,10 +59,10 @@
                     <label Improvement for="searchBar" class="sr-only">Search products</label>
                     <input type="search" id="searchBar" class="top-bar__search-input" placeholder="Search products...">
                 </div>
-                
+
                 <div class="top-bar__actions">
                     <button id="darkModeToggle" class="top-bar__btn-toggle" aria-label="Toggle dark mode">🌙</button>
-                    
+
                     <div class="user-badge">
                         <span class="user-badge__greeting">Welcome back,</span>
                         <strong class="user-badge__name">Admin</strong>
@@ -77,10 +79,24 @@
                 </div>
             </main>
             
+
         </div>
     </div>
 
+    <!-- Dialog moved outside app-layout for proper stacking context -->
+    <dialog id="product-modal" class="product-modal">
+        <div class="product-modal__content">
+            <header class="product-modal__header">
+                <h2 id="modal-title">Product Details</h2>
+                <button id="modal-close-btn" class="btn-close" aria-label="Close dialog">&times;</button>
+            </header>
+            <div id="modal-body" class="product-modal__body">
+                <!-- Content injected here -->
+            </div>
+        </div>
+    </dialog>
     <script type="module" src="./js/data.js"></script>
     <script type="module" src="./js/ui.js"></script>
 </body>
+
 </html>

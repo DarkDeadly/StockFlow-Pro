@@ -299,3 +299,253 @@ body {
     background-color: #fee2e2;
     color: #991b1b;
 }
+
+
+/* ============================================
+   DIALOG / MODAL - Modern Centered Design
+   ============================================ */
+
+/* Native dialog backdrop - dark overlay */
+.product-modal::backdrop {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    transition: opacity 0.3s ease;
+}
+
+/* Dialog container - centered by browser natively */
+.product-modal {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    padding: 0;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    max-width: 520px;
+    width: 90%;
+    max-height: 85vh;
+    overflow: hidden;
+    
+    /* Animation */
+    animation: modal-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modal-enter {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Modal content wrapper */
+.product-modal__content {
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+}
+
+/* Header */
+.product-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 16px 16px 0 0;
+}
+
+.product-modal__header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0f172a;
+    letter-spacing: -0.025em;
+}
+
+/* Close button */
+.btn-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #64748b;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.btn-close:active {
+    transform: scale(0.95);
+}
+
+/* Body */
+.product-modal__body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+/* Detail grid inside modal */
+.modal-detail-grid {
+    display: grid;
+    gap: 16px;
+}
+
+.modal-detail-grid p {
+    display: flex;
+    align-items: baseline;
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: #334155;
+}
+
+.modal-detail-grid strong {
+    min-width: 100px;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.modal-detail-grid span {
+    flex: 1;
+    word-break: break-word;
+}
+
+/* Utility classes for modal content */
+.modal-detail-grid .text-muted {
+    color: #94a3b8;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 0.8125rem;
+}
+
+.modal-detail-grid .text-indigo {
+    color: #4f46e5;
+}
+
+.modal-detail-grid .font-bold {
+    font-weight: 700;
+}
+
+/* Badge in modal */
+.modal-detail-grid .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.badge--success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge--danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+/* ============================================
+   MODAL BUTTONS
+   ============================================ */
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Base button styles */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* Primary button (Edit) */
+.btn--primary {
+    background: #4f46e5;
+    color: #ffffff;
+}
+
+.btn--primary:hover {
+    background: #4338ca;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* Danger button (Delete) */
+.btn--danger {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.btn--danger:hover {
+    background: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Screen reader only */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .product-modal {
+        animation: none;
+    }
+    
+    .product-modal::backdrop {
+        backdrop-filter: none;
+    }
+}

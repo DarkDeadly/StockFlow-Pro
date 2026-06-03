@@ -29,3 +29,4 @@
 - [ done ] connecting the search functionality
 - [ done ] fixed the problem of event delegation
 - [ done ] improving the renderProducts in order to be safe against XSS
+- [ done ] render a single product inside a modal (dialog)
