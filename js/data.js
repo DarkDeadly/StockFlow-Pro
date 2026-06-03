@@ -57,20 +57,20 @@ const loadFromStorage = () => {
  * @param {number} product.stockIn
  * @param {string} product.category
  * @param {string} product.sender
- * @returns {Object} The created or updated product
+ * @returns {{success: boolean, product?: Product, error?: string}}
  */
 const addProduct = ({ name, price, stockIn, category, sender }) => {
-    if (!name || typeof price !== 'number' || price < 0 || typeof stockIn !== 'number' || stockIn < 0 || !category || !sender) {
+    if (!name || isNaN(price) || price < 0 || isNaN(stockIn) || stockIn < 0 || !category || !sender) {
         console.error("All fields are required and numeric fields must be non-negative");
-        return null;
+        return { success: false, error: "Invalid product data" };
     }
-
-    const existing = Stock.find(item => item.name === name);
+    // Check if product with the same name already exists (case-insensitive)
+    const existing = Stock.find(item => item.name.toLowerCase() === name.toLowerCase());
 
     if (existing) {
         existing.stockIn += stockIn;
         saveToStorage();
-        return existing;
+        return { success: true, product: existing };
     }
 
     const newItem = {
@@ -85,7 +85,7 @@ const addProduct = ({ name, price, stockIn, category, sender }) => {
 
     Stock.push(newItem);
     saveToStorage();
-    return newItem;
+    return { success: true, product: newItem };
 };
 
 /**

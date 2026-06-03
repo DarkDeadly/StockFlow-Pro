@@ -260,7 +260,13 @@ body {
 .inventory-table__row--alert:hover {
     background-color: #ffedd5; /* Smooth shift to deeper warning tint */
 }
-
+.content-view__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+}
 .inventory-table__cell {
     padding: 16px 24px;
     color: #334155;

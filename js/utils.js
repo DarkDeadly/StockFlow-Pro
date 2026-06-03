@@ -42,4 +42,17 @@ export const createDetailElements = (label, value, classes = []) => {
     p.append(strong, span);
     return p;
 }
- 
+
+/**
+ * This function is used to show feedback to the user it will set the text content of the element to the message and add a class to the element based on the type of feedback (e.g., 'success', 'error').
+ * @param {HTMLElement} element - The HTML element to show the feedback in
+ * @param {string} message - The feedback message to display
+ * @param {string} type - The type of feedback (e.g., 'success', 'error')
+ * @returns {void}
+ */
+
+export const showFeedback = (element, message, type) => {
+    if (!element) return
+    element.textContent = message
+    element.className = `user-feedback user-feedback--${type}`
+}
