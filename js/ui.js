@@ -1,5 +1,5 @@
 import * as Data from './data.js';
-import {createElements , debounce , createDetailElements}  from "./utils.js"
+import {createElements , debounce , createDetailElements , syncSidebarActiveState}  from "./utils.js"
 
 
 /**
@@ -180,5 +180,6 @@ const initSearch = () => {
 renderProducts()
 addRowClickListeners() 
 initModal()           
-initSearch()          
+initSearch()   
+syncSidebarActiveState()       
 

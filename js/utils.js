@@ -56,3 +56,28 @@ export const showFeedback = (element, message, type) => {
     element.textContent = message
     element.className = `user-feedback user-feedback--${type}`
 }
+
+/**
+ * Synchronizes the sidebar active link highlighting based on the browser's current page URL
+ */
+export const syncSidebarActiveState = () => {
+    const links = document.querySelectorAll('.sidebar__link');
+    
+    // Grabs the current page name from the URL bar (e.g., "form.html" or "index.html")
+    const currentFilename = window.location.pathname.split('/').pop();
+
+    links.forEach(link => {
+        // Clear out any old active state
+        link.classList.remove('sidebar__link--active');
+
+        const hrefAttribute = link.getAttribute('href');
+
+        // Check if the current URL matches the link's href target
+        if (currentFilename === hrefAttribute) {
+            link.classList.add('sidebar__link--active');
+        } else if ((currentFilename === '' || currentFilename === 'index.html') && hrefAttribute === 'index.html') {
+            // Safety edge case: highlights Home if URL ends with a trailing slash "/"
+            link.classList.add('sidebar__link--active');
+        }
+    });
+};

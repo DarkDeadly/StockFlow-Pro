@@ -21,7 +21,7 @@
 
  **Current Phase:** 2 - UI Layer 
 
- **Today 29/05/2026**
+
 
 - [ done ] Fix the HTML structure (clean classes, better organization)
 - [ done ] Add basic CSS (sidebar fixed, nice header, responsive feel)

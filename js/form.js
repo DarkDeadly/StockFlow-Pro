@@ -1,5 +1,5 @@
 import * as Data from "./data.js"
-import { showFeedback } from './utils.js'
+import { showFeedback , syncSidebarActiveState } from './utils.js'
 /**
  * Handles the add product functionality for creating a new product 
  * @returns {void}
@@ -58,3 +58,4 @@ const handleAddProduct = () => {
 
 
 handleAddProduct()
+syncSidebarActiveState()
