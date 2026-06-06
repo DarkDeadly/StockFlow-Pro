@@ -1,7 +1,9 @@
 /* ==========================================================================
    1. GLOBAL RESETS & BASE STYLES
    ========================================================================== */
-* {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -17,7 +19,7 @@ body {
 }
 
 /* ==========================================================================
-   2. MASTER APP LAYOUT INTERFACE
+   2. APP LAYOUT
    ========================================================================== */
 .app-layout {
     display: flex;
@@ -33,10 +35,10 @@ body {
 }
 
 /* ==========================================================================
-   3. SIDEBAR COMPONENT (Enhanced Breathing Room & Contrast)
+   3. SIDEBAR
    ========================================================================== */
 .sidebar {
-    background-color: #1e293b; /* Swapped generic #333 for a deep slate for modern look */
+    background-color: #1e293b;
     width: 260px;
     height: 100vh;
     flex-shrink: 0;
@@ -49,7 +51,7 @@ body {
     color: #ffffff;
     font-size: 20px;
     font-weight: 700;
-    padding: 24px; /* Increased breathing room */
+    padding: 24px;
     letter-spacing: -0.5px;
     border-bottom: 1px solid #334155;
     display: flex;
@@ -59,21 +61,21 @@ body {
 
 .sidebar__nav {
     flex: 1;
-    padding: 24px 16px; /* Increased lateral and vertical menu container padding */
+    padding: 24px 16px;
 }
 
 .sidebar__menu {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 8px; /* Smooth, distinct element gap */
+    gap: 8px;
 }
 
 .sidebar__link {
     display: flex;
     align-items: center;
     gap: 14px;
-    color: #94a3b8; /* Cleaner unselected contrast ratio */
+    color: #94a3b8;
     text-decoration: none;
     padding: 12px 16px;
     border-radius: 8px;
@@ -82,26 +84,24 @@ body {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* State Adjustments */
 .sidebar__link:hover {
-    background-color: #273549; 
+    background-color: #273549;
     color: #f8fafc;
 }
 
-/* High Contrast Active State Strategy */
 .sidebar__link--active {
-    background-color: #4f46e5; 
-    color: #ffffff !important;
+    background-color: #4f46e5;
+    color: #ffffff;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); /* Makes the current view distinct */
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
 }
 
 /* ==========================================================================
-   4. TOP BAR UTILITIES (Prominent, Expanded Search Box)
+   4. TOP BAR
    ========================================================================== */
 .top-bar {
     height: 70px;
-    padding: 0 32px; /* Increased padding from 20px for open execution */
+    padding: 0 32px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -110,21 +110,20 @@ body {
     flex-shrink: 0;
 }
 
-/* Expanded & Prominent Search Design */
 .top-bar__search-box {
     display: flex;
     align-items: center;
     flex: 1;
-    max-width: 500px; /* Widened the search cap from 400px to 500px */
+    max-width: 500px;
 }
 
 .top-bar__search-input {
     width: 100%;
-    padding: 12px 18px; /* Deeper padding input for luxurious feel */
+    padding: 12px 18px;
     font-size: 14px;
     border: 1px solid #cbd5e1;
-    border-radius: 10px; /* Marginally smoother curve */
-    background-color: #f1f5f9; /* Darkened background variant for visibility contrast */
+    border-radius: 10px;
+    background-color: #f1f5f9;
     color: #1e293b;
     outline: none;
     transition: all 0.2s ease;
@@ -133,10 +132,9 @@ body {
 .top-bar__search-input:focus {
     background-color: #ffffff;
     border-color: #4f46e5;
-    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15); /* More prominent focus ring glow */
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
 }
 
-/* Action Groups */
 .top-bar__actions {
     display: flex;
     align-items: center;
@@ -162,7 +160,6 @@ body {
     color: #0f172a;
 }
 
-/* User Badge Identity */
 .user-badge {
     display: flex;
     align-items: center;
@@ -180,32 +177,28 @@ body {
 }
 
 /* ==========================================================================
-   5. WORKSPACE WORK AREA
+   5. CONTENT AREA
    ========================================================================== */
 .content-view {
     flex: 1;
-    padding: 40px; /* Increased content boundary padding for modern structure layouts */
+    padding: 40px;
     overflow-y: auto;
 }
 
-/* ==========================================================================
-   6. UTILITY / ACCESSIBILITY ARTIFACTS
-   ========================================================================== */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
+.content-view__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
 }
 
-
+/* ==========================================================================
+   6. TABLE
+   ========================================================================== */
 .table-responsive {
     width: 100%;
-    overflow-x: auto; /* Safety slide block layout on lower resolution devices */
+    overflow-x: auto;
     background-color: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
@@ -214,7 +207,7 @@ body {
 
 .inventory-table {
     width: 100%;
-    border-collapse: collapse; /* Shares single clean wireframes borders */
+    border-collapse: collapse;
     text-align: left;
     font-size: 14px;
     min-width: 700px;
@@ -237,61 +230,44 @@ body {
 .inventory-table__row {
     border-bottom: 1px solid #f1f5f9;
     background-color: #ffffff;
-    /* UPGRADED: Added a smooth cubic-bezier transition for background shifts */
     transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.inventory-table__row:hover {
-    background-color: #f8fafcc5; /* Gentle slate tint on hover */
-    cursor: pointer;
 
+.inventory-table__row:hover {
+    background-color: #f8fafcc5;
+    cursor: pointer;
 }
+
 .inventory-table__row:last-child {
     border-bottom: none;
 }
 
-
-/* Warning Modifier Row Treatment for Low Items */
 .inventory-table__row--alert {
-    background-color: #fff7ed; /* Warning tint */
-    /* UPGRADED: Ensure the alert row also shares the smooth transition */
-    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background-color: #fff7ed;
 }
 
 .inventory-table__row--alert:hover {
-    background-color: #ffedd5; /* Smooth shift to deeper warning tint */
+    background-color: #ffedd5;
 }
-.content-view__title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 24px;
-    letter-spacing: -0.5px;
-}
+
 .inventory-table__cell {
     padding: 16px 24px;
     color: #334155;
     vertical-align: middle;
 }
 
-/* Micro Helpers */
-.font-medium { font-weight: 500; color: #0f172a; }
-.font-bold { font-weight: 600; }
-.text-muted { color: #64748b; }
-.text-indigo { color: #4f46e5; }
-
 /* ==========================================================================
-   7. STATUS PILL BADGES
+   7. BADGES
    ========================================================================== */
 .badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    /* UPGRADED: Increased padding from 6px 12px for better visual presence */
-    padding: 6px 14px; 
+    padding: 6px 14px;
     border-radius: 9999px;
     font-size: 12px;
     font-weight: 600;
-    line-height: 1.2; /* Tweaked line-height to center text perfectly */
+    line-height: 1.2;
     text-align: center;
     letter-spacing: 0.3px;
 }
@@ -306,19 +282,136 @@ body {
     color: #991b1b;
 }
 
+/* ==========================================================================
+   8. BUTTONS
+   ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+}
 
-/* ============================================
-   DIALOG / MODAL - Modern Centered Design
-   ============================================ */
+.btn:hover {
+    transform: translateY(-1px);
+}
 
-/* Native dialog backdrop - dark overlay */
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn--sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.btn--primary {
+    background: #4f46e5;
+    color: #ffffff;
+}
+
+.btn--primary:hover {
+    background: #4338ca;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.btn--danger {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.btn--danger:hover {
+    background: #dc2626;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn--sell {
+    background-color: #10b981;
+    color: white;
+}
+
+.btn--edit {
+    background-color: #6366f1;
+    color: white;
+}
+
+/* ==========================================================================
+   9. ACTION CELL
+   ========================================================================== */
+.action-cell {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* ==========================================================================
+   10. USER FEEDBACK
+   ========================================================================== */
+.user-feedback {
+    margin-bottom: 20px;
+    min-height: 44px;
+}
+
+.user-feedback p {
+    margin: 0;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: feedback-slide 0.3s ease;
+}
+
+.user-feedback .error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.user-feedback .error::before {
+    content: '⚠';
+    font-size: 1rem;
+}
+
+.user-feedback .success {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.user-feedback .success::before {
+    content: '✓';
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+@keyframes feedback-slide {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   11. MODAL
+   ========================================================================== */
 .product-modal::backdrop {
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(4px);
-    transition: opacity 0.3s ease;
 }
 
-/* Dialog container - centered by browser natively */
 .product-modal {
     position: fixed;
     inset: 0;
@@ -326,16 +419,12 @@ body {
     padding: 0;
     border: none;
     border-radius: 16px;
-    box-shadow: 
-        0 25px 50px -12px rgba(0, 0, 0, 0.25),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
     background: #ffffff;
     max-width: 520px;
     width: 90%;
     max-height: 85vh;
     overflow: hidden;
-    
-    /* Animation */
     animation: modal-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -350,14 +439,12 @@ body {
     }
 }
 
-/* Modal content wrapper */
 .product-modal__content {
     display: flex;
     flex-direction: column;
     max-height: 85vh;
 }
 
-/* Header */
 .product-modal__header {
     display: flex;
     align-items: center;
@@ -376,7 +463,6 @@ body {
     letter-spacing: -0.025em;
 }
 
-/* Close button */
 .btn-close {
     display: flex;
     align-items: center;
@@ -402,13 +488,11 @@ body {
     transform: scale(0.95);
 }
 
-/* Body */
 .product-modal__body {
     padding: 24px;
     overflow-y: auto;
 }
 
-/* Detail grid inside modal */
 .modal-detail-grid {
     display: grid;
     gap: 16px;
@@ -437,43 +521,11 @@ body {
     word-break: break-word;
 }
 
-/* Utility classes for modal content */
 .modal-detail-grid .text-muted {
     color: #94a3b8;
     font-family: 'SF Mono', Monaco, monospace;
     font-size: 0.8125rem;
 }
-
-.modal-detail-grid .text-indigo {
-    color: #4f46e5;
-}
-
-.modal-detail-grid .font-bold {
-    font-weight: 700;
-}
-
-/* Badge in modal */
-.modal-detail-grid .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 12px;
-    border-radius: 9999px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-}
-
-.badge--success {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.badge--danger {
-    background: #fee2e2;
-    color: #991b1b;
-}
-/* ============================================
-   MODAL BUTTONS
-   ============================================ */
 
 .modal-buttons {
     display: flex;
@@ -483,56 +535,26 @@ body {
     border-top: 1px solid #e2e8f0;
 }
 
-/* Base button styles */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 80px;
+/* ==========================================================================
+   12. UTILITIES
+   ========================================================================== */
+.font-medium {
+    font-weight: 500;
+    color: #0f172a;
 }
 
-.btn:hover {
-    transform: translateY(-1px);
+.font-bold {
+    font-weight: 700;
 }
 
-.btn:active {
-    transform: translateY(0);
+.text-muted {
+    color: #64748b;
 }
 
-/* Primary button (Edit) */
-.btn--primary {
-    background: #4f46e5;
-    color: #ffffff;
+.text-indigo {
+    color: #4f46e5;
 }
 
-.btn--primary:hover {
-    background: #4338ca;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-}
-
-/* Danger button (Delete) */
-.btn--danger {
-    background: #ef4444;
-    color: #ffffff;
-}
-
-.btn--danger:hover {
-    background: #dc2626;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-/* ============================================
-   ACCESSIBILITY
-   ============================================ */
-
-/* Screen reader only */
 .sr-only {
     position: absolute;
     width: 1px;
@@ -545,7 +567,9 @@ body {
     border-width: 0;
 }
 
-/* Reduced motion preference */
+/* ==========================================================================
+   13. ACCESSIBILITY
+   ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
     .product-modal {
         animation: none;

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StockFlow Pro</title>
     <link rel="stylesheet" href="./assets/css/styles.css">
+    <link rel="stylesheet" href="./assets/css/form.css">
 </head>
 
 <body>
@@ -92,6 +93,33 @@
             </header>
             <div id="modal-body" class="product-modal__body">
                 <!-- Content injected here -->
+            </div>
+        </div>
+    </dialog>
+     <dialog id="sell-form-modal" class="product-modal">
+        <div class="product-modal__content">
+            <header class="product-modal__header">
+                <h2 id="modal-title">Sell Product</h2>
+                <button id="sell-modal-close-btn" class="btn-close" aria-label="Close dialog">&times;</button>
+            </header>
+            <div id="sell-modal-body" class="product-modal__body">
+                <div class="product-details">
+
+                </div>
+                <div class="user-feedback">
+                        
+                </div>
+                <form id = "sellProductForm" class="sell-form">
+                    <div class="form-group">
+                            <label for="productQuantity" class="form-label">Product Quantity</label>
+                            <input type="number" id="productQuantity" name="productQuantity" class="form-input" required>
+                    </div> 
+                    <div class="form-group">
+                            <label for="productReceiver" class="form-label">Receiver</label>
+                            <input type="text" id="productReceiver" name="productReceiver" class="form-input" required>
+                    </div>
+                    <button type="submit" class="form-btn">sell Product</button>
+                </form>
             </div>
         </div>
     </dialog>

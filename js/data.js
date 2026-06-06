@@ -93,25 +93,25 @@ const addProduct = ({ name, price, stockIn, category, sender }) => {
  * @param {string} id - Product ID
  * @param {number} quantity - Quantity being sold
  * @param {string} customerName - Customer name
- * @returns {Object|null} The sale record or null if failed
+ * @returns {{success: boolean, sellProduct?: Product, error?: string}} 
  */
 
 const sellProduct = (id, customerName, quantity) => {
 
     if (!id || !customerName || typeof quantity !== 'number' || quantity <= 0) {
         console.error("All fields are required and quantity must be a positive number");
-        return null;
+        return { success: false, error: "Invalid sale data" };
     }
     const product = Stock.find(item => item.id === id)
     if (!product) {
         // alert("product not found inside the stock check again")
         console.error("product not found")
-        return null
+        return { success: false, error: "Product not found" };
     }
     const availableStock = product.stockIn - product.stockOut;
     if (availableStock < quantity) {
         console.error(`Insufficient stock. Available: ${availableStock}, Requested: ${quantity}`);
-        return null;
+        return { success: false, error: "Insufficient stock" };
     }
     // create new Sale object for the sold product
     const newSell = {
@@ -131,7 +131,7 @@ const sellProduct = (id, customerName, quantity) => {
 
     saveToStorage();
     console.log(`✅ Sold ${quantity} x ${product.name} to ${customerName}`);
-    return newSell
+    return { success: true, sale: newSell };
 }
 
 /**
@@ -170,10 +170,12 @@ const getDashboardSummary = () => {
     }, 0);
 
     const totalSalesValue = Sales.reduce((sum, sale) => {
-        return sum + (sale.total || 0);
+        return sum + sale.total ;
     }, 0);
 
-    const lowStockCount = getLowStockProducts(5).length;
+    const lowStockCount = Stock.filter(item =>
+        (item.stockIn - item.stockOut) < 5
+    ).length;
     const outOfStockCount = Stock.filter(item =>
         (item.stockIn - item.stockOut) <= 0
     ).length;
@@ -187,7 +189,6 @@ const getDashboardSummary = () => {
         totalAvailableItems: Stock.reduce((sum, item) => sum + (item.stockIn - item.stockOut), 0)
     };
 
-    console.log("📊 Dashboard Summary Generated:", summary);
     return summary;
 };
 
@@ -230,42 +231,62 @@ const deleteProduct = (id) => {
  * @param {Object} updates - Fields to update
  * @returns {{success: boolean, stock: Product[], updated?: Product, error?: string}}
  */
-const updateProduct = (id, updates) => {
+/**
+ * Update the price of an existing product
+ * @param {string} id
+ * @param {number} newPrice
+ * @returns {{success: boolean, error?: string}}
+ */
+const updateProductPrice = (id, newPrice) => {
     if (typeof id !== 'string' || id.trim() === '') {
-        return { success: false, stock: Stock, error: "Invalid ID: must be a non-empty string" };
+        return { success: false, error: "Invalid ID" };
     }
 
-    if (typeof updates !== 'object' || updates === null || Object.keys(updates).length === 0) {
-        return { success: false, stock: Stock, error: "Invalid updates: must be a non-empty object" };
+    if (typeof newPrice !== 'number' || newPrice < 0) {
+        return { success: false, error: "Price must be a positive number" };
     }
 
     const index = Stock.findIndex(item => item.id === id);
     if (index === -1) {
-        return { success: false, stock: Stock, error: `No product found with ID: ${id}` };
+        return { success: false, error: "Product not found" };
     }
 
-    const product = Stock[index];
-
-    // Only allow specific safe fields
-    const allowedUpdates = {};
-    if (updates.name !== undefined) allowedUpdates.name = updates.name;
-    if (updates.price !== undefined) allowedUpdates.price = updates.price;
-    if (updates.category !== undefined) allowedUpdates.category = updates.category;
-
-    if (Object.keys(allowedUpdates).length === 0) {
-        return { success: false, stock: Stock, error: "No valid fields to update" };
-    }
-
-    const updatedProduct = { ...product, ...allowedUpdates };
-
-    Stock[index] = updatedProduct;
+    Stock[index].price = newPrice;
     saveToStorage();
 
     return {
         success: true,
-        stock: Stock,
-        updated: updatedProduct,
-        message: `Successfully updated ${updatedProduct.name}`
+        message: `Price updated to $${newPrice.toFixed(2)}`
+    };
+};
+
+/**
+ * Add additional stock to an existing product
+ * @param {string} id
+ * @param {number} quantityToAdd
+ * @returns {{success: boolean, error?: string}}
+ */
+const restockProduct = (id, quantityToAdd) => {
+    if (typeof id !== 'string' || id.trim() === '') {
+        return { success: false, error: "Invalid ID" };
+    }
+
+    if (typeof quantityToAdd !== 'number' || quantityToAdd <= 0) {
+        return { success: false, error: "Quantity must be a positive number" };
+    }
+
+    const product = Stock.find(item => item.id === id);
+    if (!product) {
+        return { success: false, error: "Product not found" };
+    }
+
+    // ✅ NEVER overwrite stockIn. Always add to it.
+    product.stockIn += quantityToAdd;
+    saveToStorage();
+
+    return {
+        success: true,
+        message: `Added ${quantityToAdd} units. New total: ${product.stockIn}`
     };
 };
 /**
@@ -403,4 +424,4 @@ loadFromStorage();
 
 
 
-export { Stock, Sales, addProduct, sellProduct, getLowStockProducts, getDashboardSummary, deleteProduct, updateProduct, searchProducts, getProductById, getAllProducts, calculateTotalRevenue, saveToStorage, loadFromStorage }
+export {restockProduct , addProduct, sellProduct, getLowStockProducts, getDashboardSummary, deleteProduct, updateProductPrice, searchProducts, getProductById, getAllProducts, calculateTotalRevenue, saveToStorage, loadFromStorage }
