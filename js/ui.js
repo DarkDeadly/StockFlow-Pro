@@ -73,7 +73,7 @@ const renderProducts = (products = null) => {
         sellButton.dataset.action = 'sell';
         sellButton.dataset.id = product.id;
 
-        const editButton = createElements('button', ['btn', 'btn--edit', 'btn--sm'], 'Edit');
+        const editButton = createElements('button', ['btn', 'btn--edit', 'btn--sm'], 'Restock');
         editButton.dataset.action = 'edit';
         editButton.dataset.id = product.id;
 
@@ -108,6 +108,7 @@ const addRowClickListeners = () => {
     if (!container) return;
     container.addEventListener('click', (e) => {
         const sellButton = e.target.closest('.btn--sell')
+        const fillButton = e.target.closest('.btn--edit')
 
         // handle sell button FIRST
         if (sellButton) {
@@ -117,6 +118,18 @@ const addRowClickListeners = () => {
             const result = Data.getProductById(row.dataset.id)
             if (result.success && result.product) {
                 sellProduct(result.product)
+            }
+            return;
+        }
+
+        // handle fillStock button 
+        if (fillButton) {
+            e.stopPropagation()
+            const row = fillButton.closest('.inventory-table__row')
+            if (!row || !row.dataset.id) return;
+            const result = Data.getProductById(row.dataset.id)
+            if (result.success && result.product) {
+                fillStock(result.product)
             }
             return;
         }
@@ -235,6 +248,52 @@ const sellProduct = (product) => {
 
     modal.showModal()
 }
+
+/**
+ * Adding new stockIn to the product
+ * @return {void} 
+ */
+const fillStock = (product) => {
+    if (!product) return
+    const modal = document.getElementById("restock__dialog")
+    if (!modal) return
+    const dialogBody = modal.querySelector('#restock-modal-body');
+
+    if (!dialogBody) return;
+    const available = product.stockIn - product.stockOut;
+    const productDetail = document.querySelector(".productDetail")
+    // Clear previous content
+   productDetail.innerHTML = ''
+   productDetail.append(
+        createDetailElements('Name', product.name),
+        createDetailElements('Available', available + ' units')
+   )
+   const form = document.getElementById('refillStock')
+   const userfeedback = modal.querySelector('.user-feedback')
+   // cloning the form 
+
+   const newForm = form.cloneNode(true)
+   form.parentNode.replaceChild(newForm , form)
+
+   const stockIn = newForm.querySelector('#quantityAdd')
+   newForm.addEventListener('submit' , ( e ) => {
+    e.preventDefault()
+    const quantity = parseInt(stockIn.value, 10)
+    if (isNaN(quantity) || quantity <= 0 ) {
+        userfeedback.innerHTML=''
+        showFeedback(userfeedback, 'Please enter a valid quantity to add.', 'error')
+        return;
+    } 
+    const result =Data.restockProduct(product.id , quantity)
+    if (result.success) {
+        renderProducts()
+        modal.close()
+
+    }
+
+   })
+   modal.showModal()
+}
 /**
  * Connects the search input to the searchProducts function
  * @returns {void}
@@ -272,6 +331,7 @@ renderProducts()
 addRowClickListeners()
 initModal('product-modal', 'modal-close-btn')
 initModal('sell-form-modal', 'sell-modal-close-btn')
+initModal('restock__dialog', 'restock-modal-close-btn')
 initSearch()
 syncSidebarActiveState()
 

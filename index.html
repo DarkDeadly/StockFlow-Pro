@@ -79,7 +79,7 @@
                     <!-- Dynamic views will mount here -->
                 </div>
             </main>
-            
+
 
         </div>
     </div>
@@ -96,10 +96,10 @@
             </div>
         </div>
     </dialog>
-     <dialog id="sell-form-modal" class="product-modal">
+    <dialog id="sell-form-modal" class="product-modal">
         <div class="product-modal__content">
             <header class="product-modal__header">
-                <h2 id="modal-title">Sell Product</h2>
+                <h2 id="sell-modal-title">Sell Product</h2>
                 <button id="sell-modal-close-btn" class="btn-close" aria-label="Close dialog">&times;</button>
             </header>
             <div id="sell-modal-body" class="product-modal__body">
@@ -107,19 +107,45 @@
 
                 </div>
                 <div class="user-feedback">
-                        
+
                 </div>
-                <form id = "sellProductForm" class="sell-form">
+                <form id="sellProductForm" class="sell-form">
                     <div class="form-group">
-                            <label for="productQuantity" class="form-label">Product Quantity</label>
-                            <input type="number" id="productQuantity" name="productQuantity" class="form-input" required>
-                    </div> 
+                        <label for="productQuantity" class="form-label">Product Quantity</label>
+                        <input type="number" id="productQuantity" name="productQuantity" class="form-input" required>
+                    </div>
                     <div class="form-group">
-                            <label for="productReceiver" class="form-label">Receiver</label>
-                            <input type="text" id="productReceiver" name="productReceiver" class="form-input" required>
+                        <label for="productReceiver" class="form-label">Receiver</label>
+                        <input type="text" id="productReceiver" name="productReceiver" class="form-input" required>
                     </div>
                     <button type="submit" class="form-btn">sell Product</button>
                 </form>
+            </div>
+        </div>
+    </dialog>
+    <dialog id="restock__dialog" class="product-modal">
+        <div class="product-modal__content">
+            <header class="product-modal__header">
+                <h2 id="restock-modal-title">Sell Product</h2>
+                <button id="restock-modal-close-btn" class="btn-close" aria-label="Close dialog">&times;</button>
+            </header>
+            <div id="restock-modal-body" class="product-modal__body">
+                <div class="modal-detail-grid">
+                    <div class="productDetail">
+
+                    </div>
+                    <div class="user-feedback">
+
+                    </div>
+                    <form id="refillStock" class="refill-form">
+                        <div class="form-group">
+                            <label for="productQuantity" class="form-label">Product Quantity</label>
+                            <input type="number" id="quantityAdd" name="productQuantity" class="form-input">
+                        </div>
+                        <button type="submit" class="form-btn">refill Product</button>
+                    </form>
+
+                </div>
             </div>
         </div>
     </dialog>
