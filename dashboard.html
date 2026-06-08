@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow Pro</title>
+    <link rel="stylesheet" href="./assets/css/styles.css">
+    <link rel="stylesheet" href="./assets/css/form.css">
+</head>
+
+<body>
+    <div class="app-layout">
+
+        <aside class="sidebar">
+            <div class="sidebar__brand">
+                <h2 class="sidebar__title">StockFlow Pro</h2>
+            </div>
+
+            <nav class="sidebar__nav">
+                <ul class="sidebar__menu">
+                    <li class="sidebar__item">
+                        <a href="index.html" class="sidebar__link sidebar__link--active">
+                            <span class="sidebar__icon">🏠</span> Home
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="form.html" class="sidebar__link">
+                            <span class="sidebar__icon">📦</span> Create
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="dashboard.html" class="sidebar__link">
+                            <span class="sidebar__icon">📊</span> Dashboard
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="#" class="sidebar__link">
+                            <span class="sidebar__icon">📈</span> Reports
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="main-viewport">
+
+            <header class="top-bar">
+                <div class="top-bar__left-spacer"></div>
+
+                <div class="top-bar__actions">
+                    <div class="user-badge">
+                        <span class="user-badge__greeting">Welcome back,</span>
+                        <strong class="user-badge__name">Admin</strong>
+                    </div>
+                    <button id="darkModeToggle" class="top-bar__btn-toggle" aria-label="Toggle dark mode">🌙</button>
+                </div>
+            </header>
+
+            <div class="dashboard-analytics">
+                <div class="analytics-card">
+                    <h3 class="analytics-card__title">Financial Summary</h3>
+                    <div class="analytics-card__chart-wrapper">
+                        <canvas id="financialChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <h3 class="analytics-card__title">Stock Status Alerts</h3>
+                    <div class="analytics-card__chart-wrapper">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="./js/data.js"></script>
+    <script type="module" src="./js/dashboard.js"></script>
+</body>
+
+</html>

@@ -370,27 +370,60 @@ body {
     animation: feedback-slide 0.3s ease;
 }
 
-.user-feedback .error {
+.user-feedback--error {
     background: #fee2e2;
     color: #991b1b;
     border: 1px solid #fecaca;
 }
 
-.user-feedback .error::before {
+.user-feedback--error::before {
     content: '⚠';
     font-size: 1rem;
 }
 
-.user-feedback .success {
+.user-feedback--success {
     background: #dcfce7;
     color: #166534;
     border: 1px solid #bbf7d0;
 }
 
-.user-feedback .success::before {
+.user-feedback--success::before {
     content: '✓';
     font-size: 1rem;
     font-weight: 700;
+}
+/* ==========================================================================
+   9. ANALYTICS METRIC CHARTS LAYOUT
+   ========================================================================== */
+.dashboard-analytics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 32px;
+    width: 100%;
+    margin-top: 24px;
+}
+
+.analytics-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.analytics-card__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+}
+
+/* CRITICAL FOR CHART.JS: Chart.js requires a relative wrapper with a fixed 
+   height to resize gracefully without expanding infinitely down the page */
+.analytics-card__chart-wrapper {
+    position: relative;
+    height: 260px; 
+    width: 100%;
 }
 
 @keyframes feedback-slide {

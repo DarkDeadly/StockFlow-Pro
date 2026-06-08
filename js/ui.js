@@ -235,11 +235,16 @@ const sellProduct = (product) => {
             return;
         }
         const result = Data.sellProduct(product.id, receiver, quantity)
+       
 
         if (result.success) {
+          
             showFeedback(userFeedback, 'Product sold successfully!', 'success')
             freshForm.reset()
             renderProducts() // update the table
+               if (available == 0) {
+            Data.deleteProduct(product.id)
+        }
             modal.close()    // close only on success
         } else {
             showFeedback(userFeedback, result.error || 'Failed to sell product.', 'error')
