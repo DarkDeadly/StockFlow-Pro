@@ -242,8 +242,10 @@ const sellProduct = (product) => {
             showFeedback(userFeedback, 'Product sold successfully!', 'success')
             freshForm.reset()
             renderProducts() // update the table
-               if (available == 0) {
+            const remaining = available - quantity  // ✅ calculate after sell
+               if (remaining === 0) {
             Data.deleteProduct(product.id)
+            renderProducts()
         }
             modal.close()    // close only on success
         } else {

@@ -33,3 +33,4 @@
 - [ done ] Getting the Addproduct functionality
 - [ done ] Sell and Restock functionality
 - [ done ] rendered the dashboard
+- [ done ] did the delete functionality and fixed its issue
